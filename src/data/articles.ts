@@ -24,6 +24,14 @@ export interface Article {
 // Newest first. TODO: replace the example article with the real articles.
 export const articles: Article[] = [
   {
+    slug: 'pre-renovation-apartment-clearing',
+    title: 'פינוי דירה ישנה לפני שיפוץ מקיף',
+    excerpt:
+      'למה חשוב לפנות את הדירה לפני השיפוץ, אילו חפצים לשמור, איך מוציאים רהיטים גדולים ומה כדאי לתאם מראש עם קבלן השיפוצים.',
+    date: '2026-09-29',
+    category: 'apartments',
+  },
+  {
     slug: 'cluttered-apartment-clearing-guide',
     title: 'המדריך המלא לפינוי דירה עמוסה בחפצים ופסולת',
     excerpt:
