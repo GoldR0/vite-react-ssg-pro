@@ -24,6 +24,14 @@ export interface Article {
 // Newest first. TODO: replace the example article with the real articles.
 export const articles: Article[] = [
   {
+    slug: 'cluttered-apartment-clearing-guide',
+    title: 'המדריך המלא לפינוי דירה עמוסה בחפצים ופסולת',
+    excerpt:
+      'איך מפנים דירה עמוסה בצורה מסודרת ובטוחה? מהערכת מצב ומיון החפצים, דרך פינוי הפסולת והרהיטים ועד הניקיון היסודי - כל השלבים במדריך אחד.',
+    date: '2026-09-29',
+    category: 'apartments',
+  },
+  {
     slug: 'hoarding-warning-signs',
     title: 'איך מזהים אגרנות כפייתית אצל אדם קרוב? 7 סימנים שכדאי להכיר',
     excerpt:
