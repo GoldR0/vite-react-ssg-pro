@@ -1,44 +1,80 @@
-import { FaGithub } from 'react-icons/fa';
 import { Link } from 'react-router';
-import { m as motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { Clock, Mail, MapPin, Phone } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
+import Logo from './Logo';
+import { getService, servicesByCategory } from '@/data/services';
+import { site, telHref, whatsappHref } from '@/data/site';
+
+const quickLinks = [
+  'hoarding-cleanup', 'apartment-clearance', 'neglected-apartment', 'deceased-apartment', 'inheritance-clearance', 'waste-removal',
+];
 
 export default function Footer() {
+  const extras = servicesByCategory('extras');
+
   return (
-    <footer className="py-12 mt-20">
-      <div className="container mx-auto px-6">
-        <div className="glass-panel rounded-2xl md:p-8 p-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            {/* Policy Links */}
-            <div className="flex md:gap-6 gap-2 text-sm order-2 md:order-1">
-              <Link to="/privacypolicy" className="text-gray-600 hover:text-purple-600 transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="text-gray-600 hover:text-purple-600 transition-colors">Terms of Service</Link>
-              <Link to="/cookiepolicy" className="text-gray-600 hover:text-purple-600 transition-colors">Cookie Policy</Link>
-            </div>
+    <footer className="bg-brand-950 text-brand-100 pb-20 md:pb-0">
+      <div className="container mx-auto px-4 lg:px-6 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <Logo light />
+          <p className="mt-4 text-sm leading-relaxed text-brand-100/80">{site.description}</p>
+        </div>
 
-            <h1>hello world</h1>
-            {/* Social Links */}
-            <div className="flex gap-4 order-1 md:order-2">
-              <motion.a
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.9 }}
-                href="https://github.com/burgil"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-linear-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-shadow"
-                aria-label="GitHub"
-              >
-                <FaGithub className="w-5 h-5" />
-              </motion.a>
-            </div>
+        <FooterList
+          title="שירותים מובילים"
+          links={quickLinks.map((slug) => ({ href: `/services/${slug}`, label: getService(slug).title }))}
+        />
 
-            {/* Copyright */}
-            <div className="text-gray-600 text-sm order-3 flex items-center gap-2">
-              Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by Burgil
-            </div>
-          </div>
+        <FooterList title="שירותים נלווים" links={extras.map((s) => ({ href: `/services/${s.slug}`, label: s.title }))} />
+
+        <div>
+          <h2 className="font-bold text-white mb-4">יצירת קשר</h2>
+          <ul className="space-y-3 text-sm">
+            <li>
+              <a href={telHref} className="flex items-center gap-2 hover:text-white">
+                <Phone className="w-4 h-4 text-accent-400" aria-hidden /><span dir="ltr">{site.phone}</span>
+              </a>
+            </li>
+            <li>
+              <a href={whatsappHref()} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white">
+                <FaWhatsapp className="w-4 h-4 text-accent-400" aria-hidden />שליחת הודעה בוואטסאפ
+              </a>
+            </li>
+            <li>
+              <a href={`mailto:${site.email}`} className="flex items-center gap-2 hover:text-white">
+                <Mail className="w-4 h-4 text-accent-400" aria-hidden />{site.email}
+              </a>
+            </li>
+            <li className="flex items-center gap-2"><MapPin className="w-4 h-4 text-accent-400" aria-hidden />שירות ב{site.serviceArea}</li>
+            <li className="flex items-center gap-2"><Clock className="w-4 h-4 text-accent-400" aria-hidden />{site.hours}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="border-t border-white/10">
+        <div className="container mx-auto px-4 lg:px-6 py-5 flex flex-col sm:flex-row gap-3 justify-between text-sm text-brand-100/70">
+          <span>© {new Date().getFullYear()} {site.name}. כל הזכויות שמורות.</span>
+          <nav className="flex gap-5" aria-label="קישורים נוספים">
+            <Link to="/services" className="hover:text-white">שירותים</Link>
+            <Link to="/gallery" className="hover:text-white">גלריה</Link>
+            <Link to="/articles" className="hover:text-white">מרכז הידע</Link>
+            <Link to="/contact" className="hover:text-white">יצירת קשר</Link>
+          </nav>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterList({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+  return (
+    <div>
+      <h2 className="font-bold text-white mb-4">{title}</h2>
+      <ul className="space-y-2.5 text-sm">
+        {links.map((l) => (
+          <li key={l.href}><Link to={l.href} className="hover:text-white">{l.label}</Link></li>
+        ))}
+      </ul>
+    </div>
   );
 }

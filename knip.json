@@ -9,12 +9,18 @@
     ".agent/**",
     ".vscode/**",
     ".cursor/**",
-    "docs/**"
+    "docs/**",
+    "src/lib/seo.ts",
+    "src/content/articles/**"
   ],
   "workspaces": {
     "default": {
-      "project": ["./src/**/*.{ts,tsx}"],
-      "ignoreDependencies": ["@typescript/native"]
+      "project": [
+        "./src/**/*.{ts,tsx}"
+      ],
+      "ignoreDependencies": [
+        "@typescript/native"
+      ]
     }
   }
 }

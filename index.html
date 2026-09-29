@@ -1,28 +1,29 @@
 <!doctype html>
-<html lang="en" className="dark scroll-smooth">
+<html lang="he" dir="rtl">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f4f49" />
 
   <!-- Preconnect to font origins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Async Font Loading Strategy with font-display: optional for zero CLS -->
+  <!-- Async font loading (Hebrew font) -->
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=optional"
+    href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
     rel="stylesheet"
     media="print"
     onload="this.media='all'">
   <noscript>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=optional"
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet">
   </noscript>
 </head>
 
-<body class="font-sans antialiased selection:bg-blue-500/30 selection:text-blue-100">
+<body class="font-sans antialiased selection:bg-accent-400/40">
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

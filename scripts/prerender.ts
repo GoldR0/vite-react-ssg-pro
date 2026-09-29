@@ -28,10 +28,22 @@ if (!templateHTML.includes('<div id="root"></div>')) {
     process.exit(1);
 }
 
-// Read SEO configuration
-const seoConfigPath = path.resolve(__dirname, '../src/seo.json');
-const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
-const globalConfig = seoConfig._global;
+// Read SEO configuration: seo.json + generated entries for service/article pages (src/lib/seo.ts)
+const seoLibPath = path.resolve(__dirname, '../src/lib/seo.ts').replace(/\\/g, '/');
+const { seoMap, seoGlobal, dynamicRoutes } = await import(`file:///${seoLibPath}`) as {
+    seoMap: Record<string, SEOConfig>;
+    seoGlobal: Record<string, any>;
+    dynamicRoutes: Record<string, string[]>;
+};
+const seoConfig: Record<string, SEOConfig> = seoMap;
+const globalConfig = seoGlobal;
+
+// Escape values injected into HTML attributes (Hebrew text often contains " as in מ"ר)
+const esc = (value: unknown) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
 // Read Vite Manifest
 const manifestPath = path.resolve(__dirname, '../dist/.vite/manifest.json');
@@ -64,12 +76,15 @@ function loadLayout(): Promise<any> {
 
 interface RouteConfig {
     path: string;
+    /** Route pattern from Router.tsx (e.g. services/:slug) when it differs from the concrete path */
+    pattern?: string;
     componentPath: string;
     outputPath: string;
     srcPath?: string; // Relative path to source file (e.g., src/pages/home.tsx)
 }
 
 interface SEOConfig {
+    name?: string;
     title: string;
     description: string;
     keywords?: string;
@@ -90,9 +105,7 @@ interface SEOConfig {
         organization?: boolean;
         website?: boolean;
         breadcrumb?: boolean;
-        jobPosting?: boolean;
-        softwareApplication?: boolean;
-        article?: boolean;
+            article?: boolean;
     };
 }
 
@@ -130,31 +143,31 @@ function generateMetaTags(routePath: string): string {
     const imageAlt = seo.ogImageAlt || `${seo.title} - ${globalConfig.siteName}`;
 
     const tags = `
-    <title>${seo.title}</title>
-    <meta name="description" content="${seo.description}" />
-    ${seo.keywords ? `<meta name="keywords" content="${seo.keywords}" />` : ''}
-    <link rel="canonical" href="${seo.canonical}" />
+    <title>${esc(seo.title)}</title>
+    <meta name="description" content="${esc(seo.description)}" />
+    ${seo.keywords ? `<meta name="keywords" content="${esc(seo.keywords)}" />` : ''}
+    <link rel="canonical" href="${encodeURI(seo.canonical)}" />
     
     <!-- Open Graph -->
     <meta property="og:type" content="${seo.ogType}" />
-    <meta property="og:title" content="${seo.title}" />
-    <meta property="og:description" content="${seo.description}" />
-    <meta property="og:url" content="${seo.canonical}" />
+    <meta property="og:title" content="${esc(seo.title)}" />
+    <meta property="og:description" content="${esc(seo.description)}" />
+    <meta property="og:url" content="${encodeURI(seo.canonical)}" />
     <meta property="og:image" content="${fullImageUrl}" />
     ${mimeType ? `<meta property="og:image:type" content="${mimeType}" />` : ''}
     <meta property="og:image:secure_url" content="${fullImageUrl}" />
-    <meta property="og:image:alt" content="${imageAlt}" />
+    <meta property="og:image:alt" content="${esc(imageAlt)}" />
     ${seo.ogImageWidth ? `<meta property="og:image:width" content="${seo.ogImageWidth}" />` : ''}
     ${seo.ogImageHeight ? `<meta property="og:image:height" content="${seo.ogImageHeight}" />` : ''}
     <meta property="og:logo" content="${logoUrl}" />
-    <meta property="og:site_name" content="${globalConfig.siteName}" />
+    <meta property="og:site_name" content="${esc(globalConfig.siteName)}" />
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="${twitterCard}" />
-    <meta name="twitter:title" content="${seo.title}" />
-    <meta name="twitter:description" content="${seo.description}" />
+    <meta name="twitter:title" content="${esc(seo.title)}" />
+    <meta name="twitter:description" content="${esc(seo.description)}" />
     <meta name="twitter:image" content="${fullImageUrl}" />
-    <meta name="twitter:image:alt" content="${imageAlt}" />
+    <meta name="twitter:image:alt" content="${esc(imageAlt)}" />
     ${twitterHandle ? `<meta name="twitter:site" content="${twitterHandle}" />` : ''}
     ${twitterHandle ? `<meta name="twitter:creator" content="${twitterHandle}" />` : ''}
     <meta property="og:locale" content="${globalConfig.locale || 'en_US'}" />
@@ -170,67 +183,51 @@ function generateMetaTags(routePath: string): string {
 
 function generateSchemaMarkup(routePath: string): string {
     const seo: SEOConfig = seoConfig[routePath] || seoConfig['/'];
-    const schemas = [];
+    const schemas: Record<string, unknown>[] = [];
+    const business = globalConfig.business;
 
-    // Organization Schema (Homepage only)
+    // Local business schema (homepage)
     if (seo.schema?.organization) {
         schemas.push({
             "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": globalConfig.organization.name,
-            "url": globalConfig.organization.url,
+            "@type": "LocalBusiness",
+            "name": globalConfig.siteName,
+            "url": globalConfig.domain,
             "logo": `${globalConfig.domain}${globalConfig.logo}`,
-            "description": globalConfig.organization.description,
-            "sameAs": [
-                globalConfig.social.twitter,
-                globalConfig.social.github,
-                globalConfig.social.linkedin
-            ],
-            "contactPoint": {
-                "@type": "ContactPoint",
-                "contactType": globalConfig.contact.type,
-                "email": globalConfig.contact.email
-            }
+            "image": `${globalConfig.domain}${globalConfig.defaultImage}`,
+            "description": business.description,
+            "telephone": business.phone,
+            "email": business.email,
+            "areaServed": business.serviceArea
         });
     }
 
-    // Website Schema with Sitelinks Search Box (Homepage only)
+    // Website schema (homepage)
     if (seo.schema?.website) {
         schemas.push({
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": globalConfig.siteName,
             "url": globalConfig.domain,
-            "potentialAction": {
-                "@type": "SearchAction",
-                "target": `${globalConfig.domain}/search?q={search_term_string}`,
-                "query-input": "required name=search_term_string"
-            }
+            "inLanguage": "he"
         });
     }
 
-    // Breadcrumb Schema
+    // Breadcrumb schema - uses each page's "name" from the SEO map
     if (seo.schema?.breadcrumb && routePath !== '/') {
         const pathParts = routePath.split('/').filter(Boolean);
         const breadcrumbItems = [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": globalConfig.domain
-            }
+            { "@type": "ListItem", "position": 1, "name": "דף הבית", "item": globalConfig.domain }
         ];
-
         pathParts.forEach((part, index) => {
-            const url = globalConfig.domain + '/' + pathParts.slice(0, index + 1).join('/');
+            const subPath = '/' + pathParts.slice(0, index + 1).join('/');
             breadcrumbItems.push({
                 "@type": "ListItem",
                 "position": index + 2,
-                "name": part.charAt(0).toUpperCase() + part.slice(1),
-                "item": url
+                "name": seoConfig[subPath]?.name || part,
+                "item": globalConfig.domain + subPath
             });
         });
-
         schemas.push({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
@@ -238,28 +235,34 @@ function generateSchemaMarkup(routePath: string): string {
         });
     }
 
-    // Software Application Schema
-    if (seo.schema?.softwareApplication) {
+    // Article schema
+    if (seo.schema?.article) {
         schemas.push({
             "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": globalConfig.software.name,
-            "applicationCategory": globalConfig.software.category,
-            "offers": {
-                "@type": "Offer",
-                "price": globalConfig.software.price.toString(),
-                "priceCurrency": globalConfig.software.priceCurrency
-            },
-            "operatingSystem": globalConfig.software.operatingSystem,
-            "description": seo.description
+            "@type": "Article",
+            "headline": seo.name || seo.title,
+            "description": seo.description,
+            "image": seo.ogImage?.startsWith('http') ? seo.ogImage : `${globalConfig.domain}${seo.ogImage}`,
+            "datePublished": seo.publishedDate,
+            "dateModified": seo.sitemap?.lastmod || seo.publishedDate,
+            "inLanguage": "he",
+            "mainEntityOfPage": seo.canonical,
+            "author": { "@type": "Organization", "name": globalConfig.siteName, "url": globalConfig.domain },
+            "publisher": {
+                "@type": "Organization",
+                "name": globalConfig.siteName,
+                "logo": { "@type": "ImageObject", "url": `${globalConfig.domain}${globalConfig.logo}` }
+            }
         });
     }
 
     if (schemas.length === 0) return '';
 
+    // Escape "<" so text content can never close the script tag
+    const json = JSON.stringify(schemas.length === 1 ? schemas[0] : schemas, null, 2).replace(/</g, '\\u003c');
     return `
     <script type="application/ld+json">
-    ${JSON.stringify(schemas.length === 1 ? schemas[0] : schemas, null, 2)}
+    ${json}
     </script>`;
 }
 
@@ -363,9 +366,24 @@ async function parseRouterForRoutes(): Promise<RouteConfig[]> {
             normalizedPath = '/' + normalizedPath;
         }
 
-        // Skip dynamic routes for now
+        // Dynamic routes: prerender every concrete path listed in src/lib/seo.ts -> dynamicRoutes
         if (normalizedPath.includes(':')) {
-            console.warn(`${colors.yellow}⚠️  Skipping dynamic route:${colors.reset} ${normalizedPath}`);
+            const concretePaths = dynamicRoutes[normalizedPath];
+            if (!concretePaths || !componentMap[componentName]) {
+                console.warn(`${colors.yellow}⚠️  Skipping dynamic route (no paths in dynamicRoutes):${colors.reset} ${normalizedPath}`);
+                continue;
+            }
+            const absolutePath = componentMap[componentName];
+            const srcPath = path.relative(path.resolve(__dirname, '..'), absolutePath).replace(/\\/g, '/');
+            for (const concretePath of concretePaths) {
+                routes.push({
+                    path: concretePath,
+                    pattern: routePath,
+                    componentPath: absolutePath,
+                    outputPath: `${concretePath.slice(1)}.html`,
+                    srcPath
+                });
+            }
             continue;
         }
 
@@ -426,7 +444,7 @@ async function prerenderRoute(route: RouteConfig): Promise<void> {
         // so the prerendered HTML includes the Navbar and Footer. LazyMotion matches main.tsx.
         const pageRoute = route.path === '/'
             ? createElement(Route, { index: true, element: createElement(Component) })
-            : createElement(Route, { path: route.path.replace(/^\//, ''), element: createElement(Component) });
+            : createElement(Route, { path: (route.pattern ?? route.path).replace(/^\//, ''), element: createElement(Component) });
 
         const element = createElement(
             LazyMotion,

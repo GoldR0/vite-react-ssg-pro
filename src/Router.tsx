@@ -1,12 +1,19 @@
 import { lazy } from 'react'
-import { BrowserRouter, Routes, Route, Link } from 'react-router'
+import { BrowserRouter, Routes, Route } from 'react-router'
 import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './Layout'
 import Home from './pages/home'
 
+const Services = lazy(() => import('./pages/services'))
+const ServicePage = lazy(() => import('./pages/service'))
+const Gallery = lazy(() => import('./pages/gallery'))
+const Articles = lazy(() => import('./pages/articles'))
+const ArticlePage = lazy(() => import('./pages/article'))
 const About = lazy(() => import('./pages/about'))
-const SuspenseExample = lazy(() => import('./pages/SuspenseExample'))
+const Contact = lazy(() => import('./pages/contact'))
+const NotFound = lazy(() => import('./pages/not-found'))
 
+// Dynamic routes (:slug) are prerendered for every path listed in src/lib/seo.ts -> dynamicRoutes
 function Router() {
   return (
     <ErrorBoundary>
@@ -14,17 +21,14 @@ function Router() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="services" element={<Services />} />
+            <Route path="services/:slug" element={<ServicePage />} />
+            <Route path="gallery" element={<Gallery />} />
+            <Route path="articles" element={<Articles />} />
+            <Route path="articles/:slug" element={<ArticlePage />} />
             <Route path="about" element={<About />} />
-            <Route path="suspense-example" element={<SuspenseExample />} />
-            <Route
-              path='*'
-              element={
-                <div className="flex flex-col items-center justify-center min-h-[70vh]">
-                  <h1 className="text-3xl font-bold mb-4">404</h1>
-                  <Link to="/" className="text-green-400 hover:text-green-300">Home</Link>
-                </div>
-              }
-            />
+            <Route path="contact" element={<Contact />} />
+            <Route path='*' element={<NotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>

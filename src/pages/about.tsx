@@ -1,41 +1,60 @@
+import { CircleCheck, EyeOff, HandHeart, ShieldCheck } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
-import { m as motion } from 'framer-motion';
-import { Code, Zap, Package } from 'lucide-react';
+import SectionHeading from '@/components/SectionHeading';
+import CtaBanner from '@/components/CtaBanner';
+import { site } from '@/data/site';
+
+// TODO: replace with the real story of the business
+const values = [
+  { icon: HandHeart, title: 'רגישות', text: 'מאחורי כל בית עמוס יש אדם ומשפחה. אנחנו עובדים בסבלנות, מקשיבים ומכבדים כל החלטה.' },
+  { icon: EyeOff, title: 'דיסקרטיות', text: 'פרטיות הלקוחות שלנו היא מעל הכול. עובדים בשקט, בלי פרסום ובלי שאלות מיותרות.' },
+  { icon: ShieldCheck, title: 'אמינות', text: 'הצעת מחיר ברורה, עמידה בזמנים ושמירה קפדנית על כל חפץ בעל ערך שנמצא בבית.' },
+];
 
 export default function AboutPage() {
-  const features = [
-    { icon: Code, title: 'Clean Code', description: 'TypeScript + ESLint configured' },
-    { icon: Zap, title: 'Fast Dev', description: 'Vite HMR for instant updates' },
-    { icon: Package, title: 'Ready to Ship', description: 'Build & deploy out of the box' }
-  ];
-
   return (
-    <main className="min-h-screen bg-[#020204] font-sans text-white">
-      <PageHeader title="About This Template" description="A production-ready Vite + React 19 template with SSG, achieving 100/100 PageSpeed scores." />
+    <>
+      <PageHeader
+        title={`אודות ${site.name}`}
+        description="אנחנו מתמחים בפינוי דירות, פינוי פסולת וטיפול בבתים עם אגרנות כפייתית - עבודה שדורשת מקצועיות, אבל לא פחות מזה לב."
+        crumbs={[{ label: 'אודות' }]}
+      />
 
-      <section className="py-16 container mx-auto px-6">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-gray-400 mb-8">
-            This repository contains a reusable Vite + React template with minimal pages and components to get you started quickly.
+      <section className="container mx-auto px-4 lg:px-6 py-14 md:py-20 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="prose-he">
+          <h2>מי אנחנו</h2>
+          <p>
+            {site.name} הוקם מתוך הבנה שפינוי דירה הוא לא רק עבודה פיזית. כשנכנסים לבית עמוס, לדירה של הורה שנפטר או לבית שבו אדם מתמודד עם אגרנות כפייתית, צריך לדעת לעבוד בעדינות, להקשיב ולקבל החלטות יחד עם המשפחה.
           </p>
+          <p>
+            הצוות שלנו מנוסה בפינוי דירות, בתים, מחסנים ומבנים מכל הסוגים, ומלווה כל פרויקט מהשיחה הראשונה ועד מסירת נכס נקי - כולל ניקיון יסודי, הדברה, פוליש והובלות.
+          </p>
+        </div>
+        <ul className="grid gap-4">
+          {['ליווי אישי לאורך כל התהליך', 'מיון מסודר ושמירה על חפצי ערך', 'תרומה ומחזור של כל מה שאפשר', 'פינוי פסולת לאתרים מורשים בלבד', 'ניקיון, הדברה ופוליש במקום אחד'].map((t) => (
+            <li key={t} className="card p-4 flex items-center gap-3 font-medium">
+              <CircleCheck className="w-5 h-5 text-brand-600 shrink-0" aria-hidden />{t}
+            </li>
+          ))}
+        </ul>
+      </section>
 
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            {features.map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="p-6 bg-white/5 rounded-lg border border-white/10"
-              >
-                <feature.icon className="w-8 h-8 text-blue-400 mb-3" />
-                <h3 className="font-bold mb-2">{feature.title}</h3>
-                <p className="text-sm text-gray-400">{feature.description}</p>
-              </motion.div>
+      <section className="bg-white py-14 md:py-20 border-y border-brand-900/5">
+        <div className="container mx-auto px-4 lg:px-6">
+          <SectionHeading eyebrow="הערכים שלנו" title="איך אנחנו עובדים" />
+          <div className="grid md:grid-cols-3 gap-5">
+            {values.map((v) => (
+              <div key={v.title} className="card p-6">
+                <v.icon className="w-9 h-9 text-accent-600 mb-4" aria-hidden />
+                <h3 className="text-xl font-bold text-brand-900 mb-2">{v.title}</h3>
+                <p className="text-muted leading-relaxed">{v.text}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
-    </main>
+
+      <CtaBanner />
+    </>
   );
 }
