@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { ArrowLeft, BookOpen } from 'lucide-react';
-import { formatDate, type Article } from '@/data/articles';
+import type { Article } from '@/data/articles';
 
 export default function ArticleCard({ article }: { article: Article }) {
   return (
@@ -21,8 +21,7 @@ export default function ArticleCard({ article }: { article: Article }) {
         )}
       </div>
       <div className="p-6 flex flex-col flex-1">
-        <time dateTime={article.date} className="text-sm text-muted">{formatDate(article.date)}</time>
-        <h3 className="mt-2 text-xl font-bold text-brand-900 leading-snug">{article.title}</h3>
+        <h3 className="text-xl font-bold text-brand-900 leading-snug">{article.title}</h3>
         <p className="mt-3 text-muted leading-relaxed flex-1 line-clamp-3">{article.excerpt}</p>
         <span className="mt-4 inline-flex items-center gap-1 font-bold text-brand-700">
           להמשך קריאה

@@ -7,7 +7,7 @@ import ArticleCard from '@/components/ArticleCard';
 import ServiceCard from '@/components/ServiceCard';
 import CtaBanner from '@/components/CtaBanner';
 import NotFound from './not-found';
-import { articles, formatDate, getArticle, loadArticleBody } from '@/data/articles';
+import { articles, getArticle, loadArticleBody } from '@/data/articles';
 import { servicesByCategory } from '@/data/services';
 import { useDocumentTitle } from '@/lib/title';
 
@@ -30,9 +30,7 @@ export default function ArticlePage() {
 
   return (
     <>
-      <PageHeader title={article.title} crumbs={[{ label: 'מרכז הידע', href: '/articles' }, { label: article.title }]}>
-        <time dateTime={article.date} className="block mt-4 text-brand-100">{formatDate(article.date)}</time>
-      </PageHeader>
+      <PageHeader title={article.title} crumbs={[{ label: 'מרכז הידע', href: '/articles' }, { label: article.title }]} />
 
       <div className="container mx-auto px-4 lg:px-6 py-12 md:py-16 grid lg:grid-cols-[1fr_340px] gap-10 lg:gap-14 items-start">
         <article className="max-w-3xl">

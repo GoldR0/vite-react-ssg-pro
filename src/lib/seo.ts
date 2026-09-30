@@ -74,8 +74,7 @@ for (const a of articles) {
     ogType: 'article',
     ogImage: a.cover?.src,
     ogImageAlt: a.cover?.alt,
-    publishedDate: a.date,
-    sitemap: { changefreq: 'yearly', priority: 0.7, lastmod: a.date },
+    sitemap: { changefreq: 'yearly', priority: 0.7 },
     schema: { breadcrumb: true, article: true },
   });
 }
